@@ -1,59 +1,61 @@
 package com.example.cs125finaltrivia;
 
-public class AppQuestions {
+import android.content.Context;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
-    private String mQuestions [] = {
-            "What is the largest planet?",
-            "Who is the President of the United States",
-            "When is the last day of class",
-            "When is the final project due?"
-    };
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.gson.JsonObject;
 
-    private String mChoices [][] = {
-            {"Jupiter", "Earth", "Sun", "Pluto"},
-            {"Hilary Clinton", "Donald Trump", "Barack Obama", "Bernie Sanders"},
-            {"Thursday", "Wednesday", "first day of break", "June 3rd"},
-            {"Monday", "Wednesday", "Friday", "Tuesday"}
-    };
+import org.json.JSONArray;
+import org.json.JSONException;
 
-    private String mCorrectAnswers[] = {"Jupiter", "Donald Trump", "Wednesday", "Tuesday"};
+import org.json.JSONObject;
 
+public class AppQuestions extends AppCompatActivity {
 
-    public String getQuestion(int a) {
-        String question = mQuestions[a];
-        return question;
-    }
+    String URL = "https://opentdb.com/api.php?amount=1&type=multiple";
 
+    RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-    public String getChoice1(int a) {
-        String choice0 = mChoices[a][0];
-        return choice0;
-    }
+    JsonObjectRequest objectRequest = new JsonObjectRequest(
+            Request.Method.GET,
+            URL,
+            null,
+            new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        JSONArray jsonArray = response.getJSONArray("results");
 
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject jsonResults = jsonArray.getJSONObject(i);
 
-    public String getChoice2(int a) {
-        String choice1 = mChoices[a][1];
-        return choice1;
-    }
-
-    public String getChoice3(int a) {
-        String choice2 = mChoices[a][2];
-        return choice2;
-    }
-    public String getChoice4(int a) {
-        String choice3 = mChoices[a][3];
-        return choice3;
-    }
-
-    public String getCorrectAnswer(int a) {
-        String answer = mCorrectAnswers[a];
-        return answer;
-    }
-
-
-
-    public int getLength(){
-        return mQuestions.length;
-    }
-
+                            /* Question and answers */
+                            String question = jsonResults.getString("question");
+                            String correctAnswer = jsonResults.getString("correct_answer");
+                            JSONArray incorrectAnswersArray = response.getJSONArray("incorrect_answers");
+                            for (int j = 0; j < incorrectAnswersArray.length(); j++) {
+                                String incorrect1 = incorrectAnswersArray.getString(0);
+                                String incorrect2 = incorrectAnswersArray.getString(1);
+                                String incorrect3 = incorrectAnswersArray.getString(2);
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("Rest Response",error.toString());
+                }
+            }
+    );
 }
